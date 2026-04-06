@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Static Dev Server (Python)",
+      "runtimeExecutable": "/opt/homebrew/bin/python3",
+      "runtimeArgs": ["-c", "import http.server,os; os.chdir('/Users/ichaeyeon/Documents/4. coad'); http.server.HTTPServer(('',8080),http.server.SimpleHTTPRequestHandler).serve_forever()"],
+      "port": 8080
+    }
+  ]
+}

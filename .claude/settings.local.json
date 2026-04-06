@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "WebSearch",
+      "Bash(gh api:*)",
+      "WebFetch(domain:jlptsensei.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.tanos.co.uk)",
+      "WebFetch(domain:japanesetest4you.com)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/jamsinclair/open-anki-jlpt-decks/main/src/n1.csv\")",
+      "Bash(python3 -c \":*)",
+      "Bash(python3 -c ':*)",
+      "Bash(python3 gen_seed.py)"
+    ]
+  }
+}

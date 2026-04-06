@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="일본어 단어장" />
+  <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <title>일본어 단어장</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- 네비게이션 탭 -->
+  <nav class="tab-bar">
+    <button class="tab active" data-tab="list">
+      <span class="tab-icon">本</span>
+      <span>단어장</span>
+    </button>
+    <button class="tab" data-tab="add">
+      <span class="tab-icon">＋</span>
+      <span>추가</span>
+    </button>
+    <button class="tab" data-tab="quiz">
+      <span class="tab-icon">◎</span>
+      <span>퀴즈</span>
+    </button>
+  </nav>
+
+  <!-- 단어 목록 화면 -->
+  <section id="page-list" class="page active">
+    <div class="page-header">
+      <h1>단어장</h1>
+      <span id="word-count" class="badge">0</span>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="단어 검색..." />
+    </div>
+    <ul id="word-list" class="word-list">
+      <li class="empty-state">단어를 추가해보세요</li>
+    </ul>
+  </section>
+
+  <!-- 단어 추가 화면 -->
+  <section id="page-add" class="page">
+    <div class="page-header">
+      <h1>단어 추가</h1>
+    </div>
+    <form id="add-form" class="add-form">
+      <div class="form-group">
+        <label>한자 <span class="hint">(없으면 비워도 됨)</span></label>
+        <input type="text" id="input-kanji" placeholder="食べる" />
+      </div>
+      <div class="form-group">
+        <label>요미가나 <span class="required">*</span></label>
+        <input type="text" id="input-reading" placeholder="たべる" required />
+      </div>
+      <div class="form-group">
+        <label>한글 뜻 <span class="required">*</span></label>
+        <input type="text" id="input-meaning" placeholder="먹다" required />
+      </div>
+      <div class="form-group">
+        <label>JLPT 레벨</label>
+        <div class="level-buttons">
+          <button type="button" class="level-btn active" data-level="N5">N5</button>
+          <button type="button" class="level-btn" data-level="N4">N4</button>
+          <button type="button" class="level-btn" data-level="N3">N3</button>
+          <button type="button" class="level-btn" data-level="N2">N2</button>
+          <button type="button" class="level-btn" data-level="N1">N1</button>
+          <button type="button" class="level-btn" data-level="-">-</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>예문 <span class="hint">(선택)</span></label>
+        <textarea id="input-example" placeholder="毎日ご飯を食べる。(매일 밥을 먹는다.)"></textarea>
+      </div>
+      <button type="submit" class="btn-primary">저장하기</button>
+    </form>
+  </section>
+
+  <!-- 퀴즈 화면 -->
+  <section id="page-quiz" class="page">
+    <!-- 퀴즈 설정 -->
+    <div id="quiz-setup">
+      <div class="page-header">
+        <h1>퀴즈</h1>
+      </div>
+      <div class="quiz-options">
+        <div class="option-group">
+          <label>문제 유형</label>
+          <div class="option-buttons">
+            <button class="option-btn active" data-mode="kanji">한자 → 뜻</button>
+            <button class="option-btn" data-mode="meaning">뜻 → 한자</button>
+            <button class="option-btn" data-mode="reading">요미가나 → 뜻</button>
+          </div>
+        </div>
+        <div class="option-group">
+          <label>JLPT 필터</label>
+          <div class="option-buttons">
+            <button class="filter-btn active" data-filter="all">전체</button>
+            <button class="filter-btn" data-filter="N5">N5</button>
+            <button class="filter-btn" data-filter="N4">N4</button>
+            <button class="filter-btn" data-filter="N3">N3</button>
+            <button class="filter-btn" data-filter="N2">N2</button>
+            <button class="filter-btn" data-filter="N1">N1</button>
+          </div>
+        </div>
+        <div class="option-group">
+          <label>문제 수</label>
+          <div class="option-buttons">
+            <button class="count-btn active" data-count="10">10개</button>
+            <button class="count-btn" data-count="20">20개</button>
+            <button class="count-btn" data-count="all">전체</button>
+          </div>
+        </div>
+      </div>
+      <button id="start-quiz-btn" class="btn-primary">퀴즈 시작</button>
+    </div>
+
+    <!-- 퀴즈 진행 -->
+    <div id="quiz-play" class="hidden">
+      <div class="quiz-progress">
+        <span id="quiz-current">1</span> / <span id="quiz-total">10</span>
+        <div class="progress-bar"><div id="progress-fill"></div></div>
+      </div>
+
+      <div id="flash-card" class="flash-card">
+        <div class="card-inner">
+          <div class="card-front">
+            <div id="card-question-label" class="card-label"></div>
+            <div id="card-question" class="card-question"></div>
+            <p class="tap-hint">탭해서 정답 확인</p>
+          </div>
+          <div class="card-back">
+            <div class="answer-row">
+              <span class="answer-label">한자</span>
+              <span id="ans-kanji" class="answer-value kanji"></span>
+            </div>
+            <div class="answer-row">
+              <span class="answer-label">읽기</span>
+              <span id="ans-reading" class="answer-value reading"></span>
+            </div>
+            <div class="answer-row">
+              <span class="answer-label">뜻</span>
+              <span id="ans-meaning" class="answer-value meaning"></span>
+            </div>
+            <div id="ans-example-wrap" class="answer-row example-row hidden">
+              <span class="answer-label">예문</span>
+              <span id="ans-example" class="answer-value example"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="quiz-actions" class="quiz-actions hidden">
+        <button id="btn-wrong" class="btn-wrong">몰랐어</button>
+        <button id="btn-correct" class="btn-correct">알았어</button>
+      </div>
+    </div>
+
+    <!-- 퀴즈 결과 -->
+    <div id="quiz-result" class="hidden">
+      <div class="result-card">
+        <div class="result-score-wrap">
+          <div id="result-emoji" class="result-emoji">🎉</div>
+          <div id="result-score" class="result-score"></div>
+          <div id="result-msg" class="result-msg"></div>
+        </div>
+        <div id="wrong-list-wrap" class="wrong-list-wrap hidden">
+          <h3>틀린 단어</h3>
+          <ul id="wrong-list"></ul>
+        </div>
+        <div class="result-buttons">
+          <button id="btn-retry" class="btn-secondary">다시 풀기</button>
+          <button id="btn-back-quiz" class="btn-primary">설정으로</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 단어 상세 모달 -->
+  <div id="word-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close">✕</button>
+      <div id="modal-kanji" class="modal-kanji"></div>
+      <div id="modal-reading" class="modal-reading"></div>
+      <div id="modal-meaning" class="modal-meaning"></div>
+      <div id="modal-level" class="modal-level"></div>
+      <div id="modal-example" class="modal-example hidden"></div>
+      <button id="modal-delete" class="btn-danger">삭제</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
