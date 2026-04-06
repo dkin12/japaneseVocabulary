@@ -2764,11 +2764,17 @@
         });
 
         try {
-          await batch.commit();
+          await Promise.race([
+            batch.commit(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('타임아웃: Firestore 응답 없음 (10초)')), 10000))
+          ]);
           success += chunk.length;
         } catch(e) {
           fail += chunk.length;
-          console.error(e);
+          status.innerHTML = `<span class="error">❌ 에러: ${e.message}</span>`;
+          btn.disabled = false;
+          btn.textContent = 'Firestore에 시드 시작';
+          return;
         }
 
         status.innerHTML = `<span class="progress">${Math.min(i + BATCH_SIZE, N1_WORDS.length)} / ${N1_WORDS.length} 처리 중... ✓${success} ✗${fail}</span>`;
