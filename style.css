@@ -612,5 +612,11 @@ html, body {
 .modal-level { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: var(--red-light); color: var(--red); margin-bottom: 12px; }
 .modal-example { font-size: 14px; color: var(--gray); line-height: 1.6; padding: 12px; background: var(--gray-light); border-radius: 10px; margin-bottom: 8px; }
 
+.modal-buttons { display: flex; gap: 10px; margin-top: 12px; }
+.modal-buttons .btn-secondary { flex: 1; }
+.modal-buttons .btn-danger { flex: 1; margin-top: 0; }
+
+.edit-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+
 /* ===== 유틸 ===== */
 .hidden { display: none !important; }

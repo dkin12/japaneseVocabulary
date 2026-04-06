@@ -186,12 +186,56 @@
     <div class="modal-backdrop"></div>
     <div class="modal-content">
       <button class="modal-close">✕</button>
-      <div id="modal-kanji" class="modal-kanji"></div>
-      <div id="modal-reading" class="modal-reading"></div>
-      <div id="modal-meaning" class="modal-meaning"></div>
-      <div id="modal-level" class="modal-level"></div>
-      <div id="modal-example" class="modal-example hidden"></div>
-      <button id="modal-delete" class="btn-danger">삭제</button>
+
+      <!-- 보기 모드 -->
+      <div id="modal-view">
+        <div id="modal-kanji" class="modal-kanji"></div>
+        <div id="modal-reading" class="modal-reading"></div>
+        <div id="modal-meaning" class="modal-meaning"></div>
+        <div id="modal-level" class="modal-level"></div>
+        <div id="modal-example" class="modal-example hidden"></div>
+        <div class="modal-buttons">
+          <button id="modal-edit" class="btn-secondary">수정</button>
+          <button id="modal-delete" class="btn-danger">삭제</button>
+        </div>
+      </div>
+
+      <!-- 수정 모드 -->
+      <div id="modal-edit-form" class="hidden">
+        <h3 class="edit-title">단어 수정</h3>
+        <div class="form-group">
+          <label>한자</label>
+          <input type="text" id="edit-kanji" />
+        </div>
+        <div class="form-group">
+          <label>요미가나 <span class="required">*</span></label>
+          <input type="text" id="edit-reading" required />
+        </div>
+        <div class="form-group">
+          <label>한글 뜻 <span class="required">*</span></label>
+          <input type="text" id="edit-meaning" required />
+        </div>
+        <div class="form-group">
+          <label>JLPT 레벨</label>
+          <div class="level-buttons">
+            <button type="button" class="level-btn edit-level-btn" data-level="N5">N5</button>
+            <button type="button" class="level-btn edit-level-btn" data-level="N4">N4</button>
+            <button type="button" class="level-btn edit-level-btn" data-level="N3">N3</button>
+            <button type="button" class="level-btn edit-level-btn" data-level="N2">N2</button>
+            <button type="button" class="level-btn edit-level-btn" data-level="N1">N1</button>
+            <button type="button" class="level-btn edit-level-btn" data-level="-">-</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>예문</label>
+          <textarea id="edit-example"></textarea>
+        </div>
+        <div class="modal-buttons">
+          <button id="edit-cancel" class="btn-secondary">취소</button>
+          <button id="edit-save" class="btn-primary" style="margin-top:0">저장</button>
+        </div>
+      </div>
+
     </div>
   </div>
 

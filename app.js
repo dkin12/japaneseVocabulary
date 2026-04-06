@@ -58,6 +58,11 @@ async function deleteWord(id) {
   await loadWords();
 }
 
+async function updateWord(id, data) {
+  await updateDoc(doc(db, "words", id), data);
+  await loadWords();
+}
+
 // =============================================
 //  단어 목록 렌더링
 // =============================================
@@ -106,11 +111,6 @@ function openModal(id) {
   }
 
   document.getElementById("word-modal").classList.remove('hidden');
-}
-
-function closeModal() {
-  document.getElementById("word-modal").classList.add('hidden');
-  currentModalWordId = null;
 }
 
 // =============================================
@@ -379,9 +379,13 @@ function showQuizSection(section) {
 // =============================================
 //  모달 이벤트
 // =============================================
+let editSelectedLevel = 'N1';
+
 function setupModal() {
   document.querySelector(".modal-backdrop").addEventListener("click", closeModal);
   document.querySelector(".modal-close").addEventListener("click", closeModal);
+
+  // 삭제
   document.getElementById("modal-delete").addEventListener("click", async () => {
     if (!currentModalWordId) return;
     if (confirm("이 단어를 삭제할까요?")) {
@@ -389,6 +393,70 @@ function setupModal() {
       closeModal();
     }
   });
+
+  // 수정 버튼 → 수정 폼으로 전환
+  document.getElementById("modal-edit").addEventListener("click", () => {
+    const w = allWords.find(x => x.id === currentModalWordId);
+    if (!w) return;
+
+    document.getElementById("edit-kanji").value = w.kanji || '';
+    document.getElementById("edit-reading").value = w.reading || '';
+    document.getElementById("edit-meaning").value = w.meaning || '';
+    document.getElementById("edit-example").value = w.example || '';
+
+    editSelectedLevel = w.level || '-';
+    document.querySelectorAll('.edit-level-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.level === editSelectedLevel);
+    });
+
+    document.getElementById("modal-view").classList.add('hidden');
+    document.getElementById("modal-edit-form").classList.remove('hidden');
+  });
+
+  // 수정 폼 레벨 버튼
+  document.querySelectorAll('.edit-level-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.edit-level-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      editSelectedLevel = btn.dataset.level;
+    });
+  });
+
+  // 취소 → 보기로 돌아가기
+  document.getElementById("edit-cancel").addEventListener("click", () => {
+    document.getElementById("modal-view").classList.remove('hidden');
+    document.getElementById("modal-edit-form").classList.add('hidden');
+  });
+
+  // 저장
+  document.getElementById("edit-save").addEventListener("click", async () => {
+    const reading = document.getElementById("edit-reading").value.trim();
+    const meaning = document.getElementById("edit-meaning").value.trim();
+    if (!reading || !meaning) { alert('요미가나와 뜻은 필수예요!'); return; }
+
+    const saveBtn = document.getElementById("edit-save");
+    saveBtn.textContent = '저장 중...';
+    saveBtn.disabled = true;
+
+    await updateWord(currentModalWordId, {
+      kanji: document.getElementById("edit-kanji").value.trim(),
+      reading,
+      meaning,
+      level: editSelectedLevel,
+      example: document.getElementById("edit-example").value.trim()
+    });
+
+    saveBtn.textContent = '저장';
+    saveBtn.disabled = false;
+    closeModal();
+  });
+}
+
+function closeModal() {
+  document.getElementById("word-modal").classList.add('hidden');
+  document.getElementById("modal-view").classList.remove('hidden');
+  document.getElementById("modal-edit-form").classList.add('hidden');
+  currentModalWordId = null;
 }
 
 // =============================================
