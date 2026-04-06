@@ -4,7 +4,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import {
   getFirestore, collection, addDoc, getDocs,
-  deleteDoc, doc, serverTimestamp, query, orderBy
+  deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy, where
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -74,6 +74,7 @@ function renderWordList(words) {
         <div class="word-item-reading">${w.kanji ? w.reading : ''}</div>
         <div class="word-item-meaning">${w.meaning}</div>
       </div>
+      ${w.needsReview ? `<span class="word-review-badge">🔁 복습</span>` : ''}
       ${w.level && w.level !== '-' ? `<span class="word-level">${w.level}</span>` : ''}
     </li>
   `).join('');
@@ -221,7 +222,19 @@ function setupQuiz() {
 }
 
 function startQuiz() {
-  let pool = quizFilter === 'all' ? [...allWords] : allWords.filter(w => w.level === quizFilter);
+  let pool;
+  if (quizFilter === 'review') {
+    pool = allWords.filter(w => w.needsReview === true);
+    if (pool.length === 0) {
+      alert('복습할 단어가 없어요!\n퀴즈에서 "몰랐어"를 누르면 여기에 쌓여요 😊');
+      return;
+    }
+  } else if (quizFilter === 'all') {
+    pool = [...allWords];
+  } else {
+    pool = allWords.filter(w => w.level === quizFilter);
+  }
+
   if (pool.length === 0) {
     alert('해당 조건의 단어가 없어요!');
     return;
@@ -289,14 +302,31 @@ function flipCard() {
   document.getElementById("quiz-actions").classList.remove('hidden');
 }
 
-function nextCard(isCorrect) {
+async function nextCard(isCorrect) {
+  const word = quizWords[quizIndex];
+
   if (isCorrect) {
     correctCount++;
+    // 복습 목록에서 제거
+    if (word.needsReview) {
+      try {
+        await updateDoc(doc(db, 'words', word.id), { needsReview: false });
+        word.needsReview = false;
+      } catch(e) { console.error(e); }
+    }
   } else {
-    wrongWords.push(quizWords[quizIndex]);
+    wrongWords.push(word);
+    // 복습 목록에 추가
+    try {
+      await updateDoc(doc(db, 'words', word.id), { needsReview: true });
+      word.needsReview = true;
+      // allWords에도 반영
+      const idx = allWords.findIndex(w => w.id === word.id);
+      if (idx !== -1) allWords[idx].needsReview = true;
+    } catch(e) { console.error(e); }
   }
-  quizIndex++;
 
+  quizIndex++;
   if (quizIndex >= quizWords.length) {
     showResult();
   } else {

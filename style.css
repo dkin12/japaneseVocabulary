@@ -331,6 +331,27 @@ html, body {
   color: var(--red);
 }
 
+.review-filter-btn {
+  border-color: #f59e0b;
+  color: #b45309;
+}
+
+.review-filter-btn.active {
+  background: #fffbeb;
+  border-color: #f59e0b;
+  color: #b45309;
+}
+
+.word-review-badge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #f59e0b;
+  flex-shrink: 0;
+}
+
 /* ===== 퀴즈 진행 ===== */
 .quiz-progress {
   display: flex;
