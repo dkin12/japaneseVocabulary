@@ -21,7 +21,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+    import { getFirestore, collection, writeBatch, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDUZdaP8wT8eQTntWFXzHF1CcZWII343qk",
@@ -2746,27 +2746,33 @@
       btn.textContent = '진행 중...';
 
       let success = 0, fail = 0;
-      const BATCH = 10;
+      const BATCH_SIZE = 500; // Firestore 배치 최대 500개
 
-      for (let i = 0; i < N1_WORDS.length; i++) {
-        const w = N1_WORDS[i];
-        try {
-          await addDoc(collection(db, 'words'), {
+      for (let i = 0; i < N1_WORDS.length; i += BATCH_SIZE) {
+        const chunk = N1_WORDS.slice(i, i + BATCH_SIZE);
+        const batch = writeBatch(db);
+
+        chunk.forEach(w => {
+          const ref = doc(collection(db, 'words'));
+          batch.set(ref, {
             kanji: w[0],
             reading: w[1],
             meaning: w[2],
             level: 'N1',
             createdAt: serverTimestamp()
           });
-          success++;
+        });
+
+        try {
+          await batch.commit();
+          success += chunk.length;
         } catch(e) {
-          fail++;
+          fail += chunk.length;
+          console.error(e);
         }
 
-        if (i % BATCH === 0 || i === N1_WORDS.length - 1) {
-          status.innerHTML = `<span class="progress">${i+1} / ${N1_WORDS.length} 처리 중... ✓${success} ✗${fail}</span>`;
-          await new Promise(r => setTimeout(r, 50));
-        }
+        status.innerHTML = `<span class="progress">${Math.min(i + BATCH_SIZE, N1_WORDS.length)} / ${N1_WORDS.length} 처리 중... ✓${success} ✗${fail}</span>`;
+        await new Promise(r => setTimeout(r, 300));
       }
 
       status.innerHTML = `<span class="done">🎉 완료! ${success}개 추가, ${fail}개 실패</span>`;
